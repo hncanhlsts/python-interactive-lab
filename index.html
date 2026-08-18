@@ -3,19 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Khám phá Python: Học qua Thử - Sai</title>
-
-  <!-- Tailwind CSS & Monaco Editor CDN -->
+  <title>Khám phá Lập trình Python</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.css">
-  
-  <!-- Pyodide Core -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
-
-  <style>
-    .terminal-scroll::-webkit-scrollbar { width: 6px; }
-    .terminal-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-  </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
 
@@ -23,175 +14,226 @@
   <header class="bg-slate-800 border-b border-slate-700 px-6 py-3 flex items-center justify-between">
     <div class="flex items-center space-x-3">
       <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
-      <h1 class="font-bold text-lg text-emerald-400">Phòng Thí Nghiệm Python</h1>
-      <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">Client-side Sandbox</span>
+      <h1 id="course-title" class="font-bold text-base md:text-lg text-emerald-400">Python Lab</h1>
     </div>
-    <div id="runtime-status" class="text-xs text-amber-400">Đang khởi tạo môi trường Python...</div>
+    <div id="runtime-status" class="text-xs text-amber-400">Đang tải Python Runtime...</div>
   </header>
 
-  <!-- Main Layout -->
-  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 max-w-7xl mx-auto w-full">
+  <!-- Layout 3 cột: Danh sách bài học - Chi tiết nhiệm vụ - Editor & Terminal -->
+  <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 max-w-[1600px] mx-auto w-full">
     
-    <!-- Cột trái: Nhiệm vụ & Gợi ý sư phạm -->
+    <!-- Cột 1: Danh sách bài học (Sidebar) -->
+    <aside class="lg:col-span-3 bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col shadow-lg h-fit lg:h-full">
+      <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Lộ trình bài học</h2>
+      <div id="lesson-list" class="space-y-2 overflow-y-auto max-h-[250px] lg:max-h-none flex-1">
+        <!-- Render tự động từ JSON -->
+      </div>
+    </aside>
+
+    <!-- Cột 2: Nhiệm vụ, Gợi ý bậc thang & Test Cases -->
     <section class="lg:col-span-4 flex flex-col gap-4">
-      
-      <!-- Thẻ nhiệm vụ -->
+      <!-- Thẻ đề bài -->
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
-        <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Thử thách #1</span>
-        <h2 class="text-lg font-bold mt-1 mb-3 text-white">Kiểm tra số chẵn / lẻ</h2>
-        <p class="text-sm text-slate-300 leading-relaxed mb-3">
-          Hãy hoàn thành hàm <code class="bg-slate-900 text-amber-300 px-1 py-0.5 rounded">kiem_tra(n)</code>.
-        </p>
-        <div class="bg-slate-900/80 rounded-lg p-3 text-xs text-slate-300 space-y-1.5 border border-slate-700/50">
-          <p><strong>Yêu cầu đầu ra:</strong></p>
-          <ul class="list-disc list-inside space-y-1 text-slate-400">
-            <li>Trả về chuỗi <code class="text-emerald-400">"Chan"</code> nếu số <code class="text-amber-300">n</code> chia hết cho 2.</li>
-            <li>Trả về chuỗi <code class="text-emerald-400">"Le"</code> trong trường hợp còn lại.</li>
-          </ul>
-        </div>
+        <span id="lesson-level" class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Mức độ</span>
+        <h2 id="lesson-title" class="text-lg font-bold mt-1 mb-2 text-white">Tiêu đề bài học</h2>
+        <div id="lesson-task" class="text-sm text-slate-300 leading-relaxed">Đang tải nội dung...</div>
       </div>
 
-      <!-- Thẻ Thử - Sai & Phản tư -->
+      <!-- Thẻ Gợi ý & Đánh giá thử sai -->
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex-1 flex flex-col">
-        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-2">
-          <span>💡</span> Gợi ý & Phản tư
-        </h3>
-        <div id="pedagogy-feedback" class="text-sm text-slate-400 leading-relaxed flex-1 overflow-y-auto">
-          Nhấn <strong>"Chạy thử code"</strong> để kiểm tra ý tưởng ban đầu của em. Đừng ngại tạo ra lỗi, mỗi thông báo lỗi là một manh mối!
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-slate-200 uppercase">💡 Phản hồi & Gợi ý</h3>
+          <button id="btn-hint" class="text-xs text-amber-400 hover:text-amber-300 underline cursor-pointer">Xem gợi ý bậc thang</button>
         </div>
-        
-        <!-- Checklist Test Case -->
-        <div class="mt-4 pt-4 border-t border-slate-700 text-xs">
-          <div class="font-semibold text-slate-300 mb-2">Tiến độ vượt qua Test Cases:</div>
-          <div id="test-list" class="space-y-1.5 text-slate-400">
-            <div id="test-1" class="flex items-center gap-2">⚪ Test 1: kiem_tra(4) == "Chan"</div>
-            <div id="test-2" class="flex items-center gap-2">⚪ Test 2: kiem_tra(7) == "Le"</div>
-            <div id="test-3" class="flex items-center gap-2">⚪ Test 3: kiem_tra(0) == "Chan"</div>
+
+        <div id="hint-container" class="hidden mb-3 p-3 bg-amber-950/40 border border-amber-800/60 rounded-lg text-xs text-amber-300 space-y-1.5">
+          <!-- Gợi ý nạp từ JSON -->
+        </div>
+
+        <div id="pedagogy-feedback" class="text-xs text-slate-400 flex-1 leading-relaxed">
+          Nhấn <strong>"Chạy thử & Chấm điểm"</strong> để kiểm tra thuật toán của em.
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-700 text-xs">
+          <div class="font-semibold text-slate-300 mb-2">Tiêu chí kiểm thử (Test Cases):</div>
+          <div id="test-case-list" class="space-y-1.5">
+            <!-- Render động từ JSON -->
           </div>
         </div>
       </div>
-
     </section>
 
-    <!-- Cột phải: Editor & Console -->
-    <section class="lg:col-span-8 flex flex-col gap-4">
-      
-      <!-- Code Editor -->
-      <div class="bg-slate-800 border border-slate-700 rounded-xl flex flex-col shadow-lg overflow-hidden h-[340px]">
-        <div class="bg-slate-800/90 px-4 py-2 border-b border-slate-700 flex justify-between items-center text-xs">
-          <span class="text-slate-400 font-mono">solution.py</span>
-          <span class="text-slate-500">Chỉnh sửa trực tiếp</span>
+    <!-- Cột 3: Trình soạn thảo & Terminal -->
+    <section class="lg:col-span-5 flex flex-col gap-3">
+      <!-- Editor -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg h-[340px] flex flex-col">
+        <div class="bg-slate-800/90 px-4 py-2 border-b border-slate-700 flex justify-between text-xs text-slate-400">
+          <span class="font-mono">main.py</span>
+          <span>Không hỗ trợ sao chép lời giải</span>
         </div>
         <div id="editor-container" class="flex-1 w-full"></div>
       </div>
 
-      <!-- Nút điều khiển -->
-      <div class="flex items-center gap-3">
-        <button id="btn-run" disabled class="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-sm shadow-md">
-          <span>▶</span> Chạy thử code
+      <!-- Điều khiển -->
+      <div class="flex gap-2">
+        <button id="btn-run" disabled class="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+          ▶ Chạy thử & Chấm điểm
         </button>
-        <button id="btn-reset" class="bg-slate-700 hover:bg-slate-600 text-slate-300 py-2.5 px-4 rounded-lg text-sm transition duration-200">
-          Khôi phục ban đầu
+        <button id="btn-reset" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded-lg text-sm transition">
+          ↺ Đặt lại
         </button>
       </div>
 
-      <!-- Output / Console -->
+      <!-- Terminal -->
       <div class="bg-black/90 border border-slate-800 rounded-xl p-4 font-mono text-xs flex-1 min-h-[160px] flex flex-col shadow-inner">
         <div class="text-slate-500 pb-2 border-b border-slate-800 mb-2 flex justify-between">
           <span>Terminal Output</span>
           <span id="exec-time" class="text-[10px]"></span>
         </div>
-        <pre id="console-output" class="text-slate-300 whitespace-pre-wrap terminal-scroll overflow-y-auto flex-1"></pre>
+        <pre id="console-output" class="text-slate-300 whitespace-pre-wrap overflow-y-auto flex-1"></pre>
       </div>
-
     </section>
-  </main>
+  </div>
 
-  <!-- Scripts: Monaco Loader & Pyodide Logic -->
+  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
   <script>
-    // Mã nguồn khởi đầu chứa lỗi logic/cú pháp nhẹ để học sinh sửa
-    const initialCode = 
-`def kiem_tra(n):
-    # Em hãy thay đổi và hoàn thiện khối lệnh bên dưới:
-    if n % 2 == 0:
-        return "Sai roi" # Gợi ý: Yêu cầu đề bài cần trả về chuỗi gì?
-    else:
-        return "Le"
-`;
-
+    let curriculum = null;
+    let currentLesson = null;
     let pyodideInstance = null;
     let editor = null;
 
-    // 1. Khởi tạo Monaco Editor
+    // 1. Khởi tạo Editor
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('editor-container'), {
-        value: initialCode,
+        value: '# Đang tải bài học...',
         language: 'python',
         theme: 'vs-dark',
-        fontSize: 14,
+        fontSize: 13,
         minimap: { enabled: false },
-        automaticLayout: true,
-        scrollBeyondLastLine: false,
-        padding: { top: 12, bottom: 12 }
+        automaticLayout: true
       });
+      loadCurriculum();
     });
 
-    // 2. Khởi tạo Pyodide WebAssembly
+    // 2. Khởi tạo Pyodide
     async function initPyodide() {
       try {
         pyodideInstance = await loadPyodide();
-        document.getElementById('runtime-status').innerText = '● Python 3.11 Runtime Ready';
+        document.getElementById('runtime-status').innerText = '● Python Ready';
         document.getElementById('runtime-status').className = 'text-xs text-emerald-400';
         document.getElementById('btn-run').disabled = false;
       } catch (err) {
-        document.getElementById('runtime-status').innerText = 'Không thể tải Python Runtime';
+        document.getElementById('runtime-status').innerText = 'Lỗi nạp Python';
         document.getElementById('runtime-status').className = 'text-xs text-rose-500';
       }
     }
     initPyodide();
 
-    // 3. Xử lý Chạy Code & Chấm bài tự động (Auto-grading)
+    // 3. Tải file JSON bài tập
+    async function loadCurriculum() {
+      try {
+        const response = await fetch('curriculum.json');
+        curriculum = await response.json();
+        document.getElementById('course-title').innerText = curriculum.course_title;
+        renderSidebar();
+        if (curriculum.lessons.length > 0) {
+          selectLesson(curriculum.lessons[0].id);
+        }
+      } catch (e) {
+        console.error("Không thể nạp file curriculum.json:", e);
+      }
+    }
+
+    // 4. Render danh sách bài học
+    function renderSidebar() {
+      const listContainer = document.getElementById('lesson-list');
+      listContainer.innerHTML = '';
+      curriculum.lessons.forEach((les, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `sidebar-item-${les.id}`;
+        btn.className = `w-full text-left p-3 rounded-lg text-xs transition border border-slate-700/50 bg-slate-900/60 hover:bg-slate-700/60 text-slate-300`;
+        btn.innerHTML = `
+          <div class="font-bold text-slate-200">Bài ${idx + 1}: ${les.title}</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">${les.level}</div>
+        `;
+        btn.onclick = () => selectLesson(les.id);
+        listContainer.appendChild(btn);
+      });
+    }
+
+    // 5. Chuyển đổi bài học được chọn
+    function selectLesson(lessonId) {
+      currentLesson = curriculum.lessons.find(l => l.id === lessonId);
+      if (!currentLesson) return;
+
+      // Đổi màu bài đang chọn
+      document.querySelectorAll('#lesson-list button').forEach(b => {
+        b.classList.remove('border-emerald-500', 'bg-slate-700/80');
+      });
+      document.getElementById(`sidebar-item-${lessonId}`).classList.add('border-emerald-500', 'bg-slate-700/80');
+
+      // Cập nhật UI
+      document.getElementById('lesson-level').innerText = currentLesson.level;
+      document.getElementById('lesson-title').innerText = currentLesson.title;
+      document.getElementById('lesson-task').innerHTML = currentLesson.task_description;
+      editor.setValue(currentLesson.initial_code);
+
+      // Cập nhật gợi ý
+      const hintBox = document.getElementById('hint-container');
+      hintBox.classList.add('hidden');
+      hintBox.innerHTML = currentLesson.hints.map(h => `<p>${h}</p>`).join('');
+
+      // Render danh sách Test Cases
+      const testList = document.getElementById('test-case-list');
+      testList.innerHTML = currentLesson.test_cases.map((t, idx) => `
+        <div id="test-row-${idx}" class="flex items-center gap-2 text-slate-400">
+          <span>⚪</span> <span>${t.name}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('pedagogy-feedback').innerHTML = 'Hãy đọc kỹ yêu cầu và thử sửa mã nguồn.';
+      document.getElementById('console-output').innerText = '';
+    }
+
+    // Toggle Gợi ý
+    document.getElementById('btn-hint').onclick = () => {
+      const hintBox = document.getElementById('hint-container');
+      hintBox.classList.toggle('hidden');
+    };
+
+    // 6. Thực thi code & Chấm điểm động từ JSON
     document.getElementById('btn-run').addEventListener('click', async () => {
+      if (!currentLesson || !pyodideInstance) return;
+
       const userCode = editor.getValue();
       const consoleOut = document.getElementById('console-output');
-      const feedbackDiv = document.getElementById('pedagogy-feedback');
-      
-      consoleOut.innerHTML = '<span class="text-slate-500">Đang thực thi mã nguồn...</span>';
-      
-      // Đoạn mã kiểm thử ngầm (Test harness)
-      const testHarness = `
+      consoleOut.innerHTML = '<span class="text-slate-500">Đang chạy kiểm thử...</span>';
+
+      // Tạo test harness tự động từ danh sách test_cases trong JSON
+      const assertionsCode = currentLesson.test_cases.map((tc, idx) => `
+    try:
+        t_${idx} = bool(${tc.assert_code})
+    except Exception as e:
+        t_${idx} = False
+`).join('\n');
+
+      const testResultsArray = currentLesson.test_cases.map((_, idx) => `t_${idx}`).join(', ');
+
+      const harness = `
 import sys
 from io import StringIO
-
-# Chặn stdout để hiển thị trên console giả lập
 sys_stdout_backup = sys.stdout
 sys.stdout = StringIO()
 
-result_data = {
-    "status": "success",
-    "stdout": "",
-    "tests": [],
-    "error": None
-}
+result_data = {"status": "success", "stdout": "", "tests": [], "error": None, "error_type": None}
 
 try:
-    # 1. Thực thi code học sinh
-${userCode.split('\n').map(line => '    ' + line).join('\n')}
+${userCode.split('\n').map(l => '    ' + l).join('\n')}
 
-    # 2. Kiểm tra các test cases
-    if 'kiem_tra' not in locals():
-        raise NameError("Hàm 'kiem_tra' chưa được định nghĩa. Đừng xóa tên hàm nhé!")
-
-    # Test 1
-    t1 = kiem_tra(4) == "Chan"
-    # Test 2
-    t2 = kiem_tra(7) == "Le"
-    # Test 3
-    t3 = kiem_tra(0) == "Chan"
-
-    result_data["tests"] = [t1, t2, t3]
+${assertionsCode}
+    result_data["tests"] = [${testResultsArray}]
 
 except Exception as e:
     result_data["status"] = "error"
@@ -204,97 +246,65 @@ result_data
 `;
 
       try {
-        const startTime = performance.now();
-        const pyResult = await pyodideInstance.runPythonAsync(testHarness);
-        const result = pyResult.toJs({ dict_converter: Object.fromEntries });
-        const endTime = performance.now();
-        
-        document.getElementById('exec-time').innerText = `${Math.round(endTime - startTime)}ms`;
+        const start = performance.now();
+        const pyResult = await pyodideInstance.runPythonAsync(harness);
+        const res = pyResult.toJs({ dict_converter: Object.fromEntries });
+        const end = performance.now();
 
-        // Render Terminal
-        if (result.stdout) {
-          consoleOut.innerText = result.stdout;
+        document.getElementById('exec-time').innerText = `${Math.round(end - start)}ms`;
+        consoleOut.innerText = res.stdout || '[Không có output print()]';
+
+        if (res.status === 'error') {
+          consoleOut.innerHTML += `\n<span class="text-rose-400 font-bold">${res.error_type}: ${res.error}</span>`;
+          handleErrorFeedback(res.error_type, res.error);
         } else {
-          consoleOut.innerHTML = '<span class="text-slate-600">[Không có output print()]</span>';
+          handleTestResults(res.tests);
         }
-
-        // Xử lý Phản hồi Sư phạm dựa trên kết quả
-        if (result.status === "error") {
-          consoleOut.innerHTML += `\n<span class="text-rose-400 font-bold">${result.error_type}: ${result.error}</span>`;
-          renderPedagogicalError(result.error_type, result.error);
-          updateTestUI([false, false, false]);
-        } else {
-          updateTestUI(result.tests);
-          evaluateLogicFeedback(result.tests);
-        }
-
       } catch (err) {
-        consoleOut.innerHTML = `<span class="text-rose-400">Lỗi biên dịch / Runtime: ${err.message}</span>`;
+        consoleOut.innerHTML = `<span class="text-rose-400">Lỗi nghiêm trọng: ${err.message}</span>`;
       }
     });
 
-    // 4. Cập nhật trạng thái Test Cases UI
-    function updateTestUI(testResults) {
-      testResults.forEach((passed, idx) => {
-        const el = document.getElementById(`test-${idx + 1}`);
+    // 7. Cập nhật UI Test cases & Phản hồi sư phạm
+    function handleTestResults(results) {
+      let allPassed = true;
+      let firstFailedMsg = "";
+
+      results.forEach((passed, idx) => {
+        const row = document.getElementById(`test-row-${idx}`);
+        const testDef = currentLesson.test_cases[idx];
         if (passed) {
-          el.innerHTML = `<span class="text-emerald-400 font-bold">✓</span> Test ${idx + 1}: Hoàn thành`;
-          el.className = "flex items-center gap-2 text-emerald-400 font-medium";
+          row.innerHTML = `<span class="text-emerald-400 font-bold">✓</span> <span class="text-emerald-300">${testDef.name}</span>`;
         } else {
-          el.innerHTML = `<span class="text-rose-500 font-bold">✗</span> Test ${idx + 1}: Chưa đạt`;
-          el.className = "flex items-center gap-2 text-rose-400";
+          allPassed = false;
+          row.innerHTML = `<span class="text-rose-500 font-bold">✗</span> <span class="text-rose-300">${testDef.name}</span>`;
+          if (!firstFailedMsg) firstFailedMsg = testDef.fail_msg;
         }
       });
-    }
 
-    // 5. Diễn giải lỗi thân thiện cho học sinh (Pedagogical Error Hinting)
-    function renderPedagogicalError(type, msg) {
       const feedback = document.getElementById('pedagogy-feedback');
-      let hint = "";
-
-      if (type === "IndentationError") {
-        hint = "🔍 <strong>Lỗi thụt lề:</strong> Python quy định các khối lệnh bên trong <code>if</code>, <code>else</code> hoặc <code>def</code> phải được thụt vào (dùng 4 dấu cách hoặc phím Tab). Em hãy kiểm tra lại các dòng code con nhé!";
-      } else if (type === "SyntaxError") {
-        hint = "🔍 <strong>Lỗi cú pháp:</strong> Có thể em đã quên dấu hai chấm <code>:</code> ở cuối câu lệnh <code>if</code>/<code>else</code>, hoặc đóng/mở ngoặc chưa đủ.";
-      } else if (type === "NameError") {
-        hint = `🔍 <strong>Lỗi gọi tên biến/hàm:</strong> ${msg}. Em hãy kiểm tra xem có gõ sai chính tả tên biến hoặc tên hàm không.`;
-      } else {
-        hint = `🔍 <strong>Gặp lỗi:</strong> ${msg}. Hãy đọc lại dòng code vừa chỉnh sửa để tìm manh mối.`;
-      }
-
-      feedback.innerHTML = `<div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-lg text-rose-300">${hint}</div>`;
-    }
-
-    // 6. Đánh giá logic nếu code không bị lỗi cú pháp
-    function evaluateLogicFeedback(tests) {
-      const feedback = document.getElementById('pedagogy-feedback');
-      const allPassed = tests.every(Boolean);
-
       if (allPassed) {
-        feedback.innerHTML = `
-          <div class="p-3 bg-emerald-950/50 border border-emerald-700/60 rounded-lg text-emerald-300 space-y-2">
-            <p class="font-bold">🎉 Xuất sắc! Em đã vượt qua toàn bộ thử thách.</p>
-            <p class="text-xs">Em đã hiểu cách sử dụng toán tử chia lấy dư <code>%</code> và cấu trúc rẽ nhánh <code>if - else</code>.</p>
-          </div>
-        `;
+        feedback.innerHTML = `<div class="p-2.5 bg-emerald-950/60 border border-emerald-700/60 rounded text-emerald-300">🎉 <strong>Rất tốt!</strong> Em đã giải quyết chính xác toàn bộ yêu cầu bài học.</div>`;
       } else {
-        feedback.innerHTML = `
-          <div class="p-3 bg-amber-950/40 border border-amber-800/60 rounded-lg text-amber-300 space-y-1 text-xs">
-            <p class="font-bold text-sm">⚠️ Code chạy được nhưng kết quả chưa chính xác:</p>
-            <p>- Hãy kiểm tra giá trị trả về (<code>return</code>) đã đúng từng chữ hoa/thường như yêu cầu chưa (Ví dụ: <code>"Chan"</code> khác với <code>"Sai roi"</code>).</p>
-            <p>- Số <code>0</code> cũng là số chẵn, kiểm tra xem điều kiện chia hết cho 2 của em đã bao quát trường hợp này chưa.</p>
-          </div>
-        `;
+        feedback.innerHTML = `<div class="p-2.5 bg-rose-950/50 border border-rose-800/60 rounded text-rose-300 space-y-1"><div>⚠️ <strong>Chưa đạt:</strong></div><div>${firstFailedMsg}</div></div>`;
       }
     }
 
-    // Nút khôi phục
-    document.getElementById('btn-reset').addEventListener('click', () => {
-      if (editor) editor.setValue(initialCode);
-      document.getElementById('console-output').innerHTML = '';
-      document.getElementById('pedagogy-feedback').innerHTML = 'Đã khôi phục mã nguồn ban đầu. Hãy thử lại!';
-      updateTestUI([false, false, false]);
-    });
+    function handleErrorFeedback(type, msg) {
+      const feedback = document.getElementById('pedagogy-feedback');
+      let hint = `Đoạn mã dừng lại do lỗi <code>${type}</code> (${msg}).`;
+      if (type === "IndentationError") hint = "Lỗi thụt lề: Các câu lệnh con bên trong hàm hoặc khối if/else cần lùi vào 4 dấu cách.";
+      if (type === "SyntaxError") hint = "Lỗi cú pháp: Kiểm tra lại dấu hai chấm <code>:</code> hoặc các cặp ngoặc.";
+      feedback.innerHTML = `<div class="p-2.5 bg-amber-950/50 border border-amber-800/60 rounded text-amber-300">${hint}</div>`;
+    }
+
+    // Đặt lại code ban đầu
+    document.getElementById('btn-reset').onclick = () => {
+      if (currentLesson) {
+        editor.setValue(currentLesson.initial_code);
+        selectLesson(currentLesson.id);
+      }
+    };
   </script>
 </body>
 </html>
