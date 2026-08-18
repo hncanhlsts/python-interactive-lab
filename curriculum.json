@@ -3,48 +3,167 @@
   "lessons": [
     {
       "lesson_id": "lesson-1",
-      "lesson_title": "Bài 1: Làm quen & Cú pháp cơ bản",
+      "lesson_title": "Bài 1: Biến, Kiểu dữ liệu & Tính toán số học",
       "exercises": [
         {
           "id": "ex-1-1",
-          "title": "Thực hành 1.1: Sửa lỗi cú pháp & thụt lề",
+          "title": "1.1 Sửa lỗi cú pháp tính diện tích",
           "level": "Mức 1: Debugging",
-          "description": "Hàm <code>tinh_tien(tuoi)</code> đang bị lỗi cú pháp. Sửa lại để trả về <code>0</code> nếu tuổi < 6, ngược lại trả về <code>50000</code>.",
-          "initial_code": "def tinh_tien(tuoi)\nif tuoi < 6:\nreturn 0\nelse:\nreturn 50000",
-          "hints": ["Kiểm tra dấu hai chấm ':' ở dòng def, if, else.", "Thụt lề 4 dấu cách cho các dòng lệnh con bên trong."],
+          "description": "Đoạn mã tính diện tích hình chữ nhật đang bị lỗi cú pháp và thụt lề. Hãy sửa lại để hàm <code>tinh_dien_tich(dai, rong)</code> trả về diện tích chính xác.",
+          "initial_code": "def tinh_dien_tich(dai, rong)\nreturn dai * rong",
+          "hints": [
+            "Kiểm tra xem ở cuối dòng định nghĩa hàm `def` đã có dấu hai chấm `:` chưa?",
+            "Lệnh `return` nằm trong hàm nên cần được thụt lề vào 4 khoảng trắng."
+          ],
           "test_cases": [
-            { "name": "Tuổi = 4 (Trẻ em)", "assert_code": "tinh_tien(4) == 0", "fail_msg": "Tuổi < 6 phải trả về 0." },
-            { "name": "Tuổi = 10 (Người lớn)", "assert_code": "tinh_tien(10) == 50000", "fail_msg": "Tuổi >= 6 phải trả về 50000." }
+            { "name": "Dài 5, Rộng 3 (Diện tích 15)", "assert_code": "tinh_dien_tich(5, 3) == 15", "fail_msg": "Kết quả phải là 5 * 3 = 15." },
+            { "name": "Dài 10, Rộng 10 (Diện tích 100)", "assert_code": "tinh_dien_tich(10, 10) == 100", "fail_msg": "Kết quả phải là 10 * 10 = 100." }
           ]
         },
         {
           "id": "ex-1-2",
-          "title": "Thực hành 1.2: Lời chào tương tác (input)",
-          "level": "Mức 2: Nhập xuất",
-          "description": "Viết hàm <code>chao_hoi(ten)</code> nhận vào tên và trả về chuỗi <code>'Xin chao, ' + ten + '!'</code>.",
-          "initial_code": "def chao_hoi(ten):\n    # Hoàn thiện logic trả về chuỗi lời chào\n    pass",
-          "hints": ["Sử dụng f-string: return f'Xin chao, {ten}!' hoặc ghép chuỗi '+'."],
+          "title": "1.2 Tính chu vi hình tròn",
+          "level": "Mức 2: Biểu thức số học",
+          "description": "Viết hàm <code>chu_vi_tron(r)</code> tính chu vi hình tròn với bán kính <code>r</code> theo công thức $C = 2 \\times 3.14 \\times r$. Làm tròn kết quả đến 2 chữ số thập phân bằng hàm <code>round(..., 2)</code>.",
+          "initial_code": "def chu_vi_tron(r):\n    # Hoàn thiện công thức tính chu vi tại đây\n    pass",
+          "hints": [
+            "Công thức: cv = 2 * 3.14 * r",
+            "Dùng `return round(cv, 2)` để trả về kết quả."
+          ],
           "test_cases": [
-            { "name": "Chào 'Nam'", "assert_code": "chao_hoi('Nam') == 'Xin chao, Nam!'", "fail_msg": "Định dạng chuỗi chưa chính xác." },
-            { "name": "Chào 'Linh'", "assert_code": "chao_hoi('Linh') == 'Xin chao, Linh!'", "fail_msg": "Kiểm tra dấu phẩy và dấu chấm than." }
+            { "name": "Bán kính r = 5", "assert_code": "chu_vi_tron(5) == 31.4", "fail_msg": "Với r = 5, chu vi phải là 31.4." },
+            { "name": "Bán kính r = 2.5", "assert_code": "chu_vi_tron(2.5) == 15.7", "fail_msg": "Với r = 2.5, chu vi phải là 15.7." }
+          ]
+        },
+        {
+          "id": "ex-1-3",
+          "title": "1.3 Ép kiểu chuỗi sang số nguyên",
+          "level": "Mức 3: Kiểu dữ liệu (Casting)",
+          "description": "Hàm <code>tong_hai_so(a_str, b_str)</code> nhận vào hai chuỗi ký tự chứa số (ví dụ: '10', '25'). Hãy ép kiểu sang số nguyên và trả về tổng của chúng.",
+          "initial_code": "def tong_hai_so(a_str, b_str):\n    # Chú ý: a_str + b_str sẽ nối chuỗi chứ không cộng số\n    return a_str + b_str",
+          "hints": [
+            "Dùng hàm int() để chuyển đổi: `int(a_str)` và `int(b_str)`.",
+            "Trả về tổng: `return int(a_str) + int(b_str)`."
+          ],
+          "test_cases": [
+            { "name": "Cộng '12' và '8' (Tổng 20)", "assert_code": "tong_hai_so('12', '8') == 20", "fail_msg": "'12' + '8' phải trả về số 20, không phải chuỗi '128'." },
+            { "name": "Cộng '100' và '250' (Tổng 350)", "assert_code": "tong_hai_so('100', '250') == 350", "fail_msg": "Tổng phải là số nguyên 350." }
+          ]
+        },
+        {
+          "id": "ex-1-4",
+          "title": "1.4 Phép chia lấy phần nguyên và phần dư",
+          "level": "Mức 4: Toán tử // và %",
+          "description": "Viết hàm <code>doi_phut_ra_gio(tong_phut)</code> nhận vào tổng số phút. Trả về một chuỗi có định dạng: <code>'{gio} gio {phut} phut'</code> (Ví dụ: 130 phút -> '2 gio 10 phut').",
+          "initial_code": "def doi_phut_ra_gio(tong_phut):\n    # Gợi ý: Dùng toán tử // để lấy số giờ và % để lấy số phút dư\n    pass",
+          "hints": [
+            "Số giờ: `gio = tong_phut // 60`",
+            "Số phút dư: `phut = tong_phut % 60`",
+            "Dùng f-string: `return f'{gio} gio {phut} phut'`"
+          ],
+          "test_cases": [
+            { "name": "Đổi 130 phút", "assert_code": "doi_phut_ra_gio(130) == '2 gio 10 phut'", "fail_msg": "130 phút phải đổi thành '2 gio 10 phut'." },
+            { "name": "Đổi 45 phút", "assert_code": "doi_phut_ra_gio(45) == '0 gio 45 phut'", "fail_msg": "45 phút phải đổi thành '0 gio 45 phut'." },
+            { "name": "Đổi 120 phút tròn", "assert_code": "doi_phut_ra_gio(120) == '2 gio 0 phut'", "fail_msg": "120 phút phải đổi thành '2 gio 0 phut'." }
+          ]
+        },
+        {
+          "id": "ex-1-5",
+          "title": "1.5 Xử lý nhập liệu tương tác (input)",
+          "level": "Mức 5: Thực hành tương tác",
+          "description": "Viết hàm <code>nhap_va_tinh_gap_doi()</code> sử dụng hàm <code>input('Nhap so: ')</code> để nhận một số từ bàn phím, sau đó in ra màn hình chuỗi <code>Ket qua: {so * 2}</code>.",
+          "initial_code": "def nhap_va_tinh_gap_doi():\n    # Nhập số từ bàn phím, ép kiểu int, và print kết quả\n    val = input('Nhap so: ')\n    # Hãy hoàn thiện lệnh print bên dưới:\n",
+          "hints": [
+            "Ép kiểu sang int: `num = int(val)`",
+            "In ra màn hình: `print(f'Ket qua: {num * 2}')`"
+          ],
+          "test_cases": [
+            { "name": "Kiểm tra hàm tồn tại", "assert_code": "callable(nhap_va_tinh_gap_doi)", "fail_msg": "Hàm nhap_va_tinh_gap_doi chưa được định nghĩa đúng." }
           ]
         }
       ]
     },
     {
       "lesson_id": "lesson-2",
-      "lesson_title": "Bài 2: Cấu trúc rẽ nhánh (if - elif - else)",
+      "lesson_title": "Bài 2: Cấu trúc Rẽ nhánh (if - elif - else)",
       "exercises": [
         {
           "id": "ex-2-1",
-          "title": "Thực hành 2.1: Xếp loại học lực",
-          "level": "Mức 2: Hoàn thiện logic",
-          "description": "Viết hàm <code>xep_loai(diem)</code> trả về <code>'Dat'</code> nếu điểm >= 5.0, ngược lại trả về <code>'Chua dat'</code>.",
-          "initial_code": "def xep_loai(diem):\n    # Viết câu lệnh điều kiện if - else tại đây\n    pass",
-          "hints": ["Dùng 'if diem >= 5.0:' để xét điểm đạt."],
+          "title": "2.1 Tìm số lớn hơn trong hai số",
+          "level": "Mức 1: if - else cơ bản",
+          "description": "Viết hàm <code>tim_max(a, b)</code> trả về số lớn hơn giữa <code>a</code> và <code>b</code>. Nếu hai số bằng nhau, trả về chính giá trị đó.",
+          "initial_code": "def tim_max(a, b):\n    if a > b:\n        return a\n    # Hoàn thành nhánh còn lại\n",
+          "hints": [
+            "Bổ sung nhánh `else:` và trả về `b`."
+          ],
           "test_cases": [
-            { "name": "Điểm 7.0 (Đạt)", "assert_code": "xep_loai(7.0) == 'Dat'", "fail_msg": "Điểm 7.0 phải trả về 'Dat'." },
-            { "name": "Điểm 4.5 (Chưa đạt)", "assert_code": "xep_loai(4.5) == 'Chua dat'", "fail_msg": "Điểm 4.5 phải trả về 'Chua dat'." }
+            { "name": "a = 15, b = 7 (Max 15)", "assert_code": "tim_max(15, 7) == 15", "fail_msg": "Số lớn hơn giữa 15 và 7 là 15." },
+            { "name": "a = 3, b = 9 (Max 9)", "assert_code": "tim_max(3, 9) == 9", "fail_msg": "Số lớn hơn giữa 3 và 9 là 9." },
+            { "name": "a = 5, b = 5 (Hai số bằng nhau)", "assert_code": "tim_max(5, 5) == 5", "fail_msg": "Hai số bằng nhau thì trả về 5." }
+          ]
+        },
+        {
+          "id": "ex-2-2",
+          "title": "2.2 Kiểm tra số âm, dương hay số không",
+          "level": "Mức 2: if - elif - else",
+          "description": "Viết hàm <code>xet_dau(n)</code> trả về:<br>• <code>'Duong'</code> nếu $n > 0$<br>• <code>'Am'</code> nếu $n < 0$<br>• <code>'Khong'</code> nếu $n = 0$",
+          "initial_code": "def xet_dau(n):\n    # Dùng cấu trúc if - elif - else\n    pass",
+          "hints": [
+            "Sử dụng `if n > 0:` -> return 'Duong'",
+            "Sử dụng `elif n < 0:` -> return 'Am'",
+            "Nhánh `else:` -> return 'Khong'"
+          ],
+          "test_cases": [
+            { "name": "Số dương (n = 10)", "assert_code": "xet_dau(10) == 'Duong'", "fail_msg": "10 là số 'Duong'." },
+            { "name": "Số âm (n = -4)", "assert_code": "xet_dau(-4) == 'Am'", "fail_msg": "-4 là số 'Am'." },
+            { "name": "Số không (n = 0)", "assert_code": "xet_dau(0) == 'Khong'", "fail_msg": "0 là số 'Khong'." }
+          ]
+        },
+        {
+          "id": "ex-2-3",
+          "title": "2.3 Kiểm tra năm nhuận",
+          "level": "Mức 3: Kết hợp điều kiện logic (and, or)",
+          "description": "Viết hàm <code>la_nam_nhuan(nam)</code> trả về <code>True</code> nếu là năm nhuận, ngược lại trả về <code>False</code>.<br><i>Quy tắc: Năm chia hết cho 400 HOẶC (chia hết cho 4 VÀ không chia hết cho 100).</i>",
+          "initial_code": "def la_nam_nhuan(nam):\n    # Gợi ý: Dùng toán tử % để kiểm tra chia hết\n    pass",
+          "hints": [
+            "Điều kiện 1: `nam % 400 == 0`",
+            "Điều kiện 2: `(nam % 4 == 0 and nam % 100 != 0)`",
+            "Kết hợp cả 2 điều kiện bằng toán tử `or`."
+          ],
+          "test_cases": [
+            { "name": "Năm 2024 (Năm nhuận)", "assert_code": "la_nam_nhuan(2024) is True", "fail_msg": "2024 là năm nhuận (chia hết cho 4 nhưng không chia hết cho 100)." },
+            { "name": "Năm 1900 (Không nhuận)", "assert_code": "la_nam_nhuan(1900) is False", "fail_msg": "1900 chia hết cho 100 nhưng không chia hết cho 400 nên không phải năm nhuận." },
+            { "name": "Năm 2000 (Năm nhuận)", "assert_code": "la_nam_nhuan(2000) is True", "fail_msg": "2000 chia hết cho 400 nên là năm nhuận." }
+          ]
+        },
+        {
+          "id": "ex-2-4",
+          "title": "2.4 Tính tiền cước Taxi theo km",
+          "level": "Mức 4: Tính toán đa phân đoạn",
+          "description": "Viết hàm <code>tien_taxi(km)</code> tính tiền cước di chuyển:<br>• 1 km đầu tiên: giá <b>10.000đ</b><br>• Từ km thứ 2 đến km thứ 10: giá <b>8.000đ/km</b><br>• Từ km thứ 11 trở đi: giá <b>6.000đ/km</b>",
+          "initial_code": "def tien_taxi(km):\n    if km <= 1:\n        return 10000\n    elif km <= 10:\n        return 10000 + (km - 1) * 8000\n    else:\n        # Tính tiền khi km > 10\n        pass",
+          "hints": [
+            "Khi km > 10: Tiền = 10.000 (km đầu) + 9 * 8.000 (9 km tiếp theo) + (km - 10) * 6.000."
+          ],
+          "test_cases": [
+            { "name": "Đi 1 km (10.000đ)", "assert_code": "tien_taxi(1) == 10000", "fail_msg": "1 km giá 10000." },
+            { "name": "Đi 5 km (42.000đ)", "assert_code": "tien_taxi(5) == 42000", "fail_msg": "5 km = 10000 + 4 * 8000 = 42000." },
+            { "name": "Đi 12 km (94.000đ)", "assert_code": "tien_taxi(12) == 94000", "fail_msg": "12 km = 10000 + 72000 + 2 * 6000 = 94000." }
+          ]
+        },
+        {
+          "id": "ex-2-5",
+          "title": "2.5 Kiểm tra 3 cạnh của tam giác",
+          "level": "Mức 5: Điều kiện hình học",
+          "description": "Viết hàm <code>la_tam_giac(a, b, c)</code> nhận vào 3 độ dài cạnh ($a, b, c > 0$). Trả về <code>True</code> nếu 3 cạnh tạo thành một tam giác hợp lệ (tổng 2 cạnh bất kỳ luôn lớn hơn cạnh còn lại), ngược lại trả về <code>False</code>.",
+          "initial_code": "def la_tam_giac(a, b, c):\n    # Kiểm tra điều kiện bất đẳng thức tam giác\n    pass",
+          "hints": [
+            "Cả 3 điều kiện phải đồng thời đúng: `a + b > c and a + c > b and b + c > a`."
+          ],
+          "test_cases": [
+            { "name": "Bộ ba (3, 4, 5) - Hợp lệ", "assert_code": "la_tam_giac(3, 4, 5) is True", "fail_msg": "(3, 4, 5) tạo thành tam giác vuông hợp lệ." },
+            { "name": "Bộ ba (1, 2, 3) - Không hợp lệ", "assert_code": "la_tam_giac(1, 2, 3) is False", "fail_msg": "1 + 2 = 3 (không lớn hơn 3) nên không tạo thành tam giác." },
+            { "name": "Bộ ba (5, 12, 13) - Hợp lệ", "assert_code": "la_tam_giac(5, 12, 13) is True", "fail_msg": "(5, 12, 13) tạo thành tam giác hợp lệ." }
           ]
         }
       ]
