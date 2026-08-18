@@ -1,0 +1,63 @@
+{
+  "course_title": "Nhập môn Lập trình Python cùng Tư duy Thử - Sai",
+  "lessons": [
+    {
+      "id": "lesson-01",
+      "level": "Mức 1: Sửa lỗi (Debugging)",
+      "title": "Sửa lỗi thụt lề và Cú pháp cơ bản",
+      "objective": "Nhận biết và sửa lỗi cú pháp cơ bản trong cấu trúc rẽ nhánh.",
+      "task_description": "Đoạn mã dưới đây đang bị lỗi cú pháp và thụt lề. Hãy sửa lại để hàm <code>tinh_tien_ve(tuoi)</code> trả về giá vé: <code>0</code> nếu tuổi < 6, và <code>50000</code> cho các trường hợp còn lại.",
+      "initial_code": "def tinh_tien_ve(tuoi)\nif tuoi < 6:\nreturn 0\nelse:\nreturn 50000",
+      "hints": [
+        "🔍 Gợi ý 1: Ở dòng định nghĩa hàm `def`, em đã có dấu hai chấm `:` ở cuối dòng chưa?",
+        "🔍 Gợi ý 2: Khối lệnh bên trong `if` và `else` cần được thụt lề vào 4 khoảng trắng (hoặc 1 phím Tab)."
+      ],
+      "test_cases": [
+        {
+          "name": "Kiểm tra vé trẻ em (tuoi = 4)",
+          "assert_code": "tinh_tien_ve(4) == 0",
+          "fail_msg": "Với tuổi = 4, giá vé phải là 0 đồng."
+        },
+        {
+          "name": "Kiểm tra vé người lớn (tuoi = 15)",
+          "assert_code": "tinh_tien_ve(15) == 50000",
+          "fail_msg": "Với tuổi = 15, giá vé phải là 50000 đồng."
+        },
+        {
+          "name": "Kiểm tra mốc biên (tuoi = 6)",
+          "assert_code": "tinh_tien_ve(6) == 50000",
+          "fail_msg": "Với tuổi = 6 (từ 6 tuổi trở lên), giá vé là 50000 đồng."
+        }
+      ]
+    },
+    {
+      "id": "lesson-02",
+      "level": "Mức 2: Hoàn thiện logic",
+      "title": "Xếp loại học lực",
+      "objective": "Sử dụng cấu trúc rẽ nhánh nhiều nhánh if - elif - else.",
+      "task_description": "Viết hàm <code>xep_loai(diem)</code> nhận vào điểm số (0 - 10) và trả về:<br>• <code>'Dat'</code> nếu <code>diem >= 5</code><br>• <code>'Chua dat'</code> nếu <code>diem < 5</code>",
+      "initial_code": "def xep_loai(diem):\n    # Em hãy hoàn thiện logic ở đây\n    pass",
+      "hints": [
+        "🔍 Gợi ý 1: Dùng câu lệnh `if diem >= 5:` để xét điều kiện Đạt.",
+        "🔍 Gợi ý 2: Chú ý trả về đúng chuỗi ký tự hoa/thường theo yêu cầu: 'Dat' và 'Chua dat'."
+      ],
+      "test_cases": [
+        {
+          "name": "Kiểm tra điểm đạt (diem = 8.5)",
+          "assert_code": "xep_loai(8.5) == 'Dat'",
+          "fail_msg": "Điểm 8.5 phải xếp loại 'Dat'."
+        },
+        {
+          "name": "Kiểm tra điểm chưa đạt (diem = 4.0)",
+          "assert_code": "xep_loai(4.0) == 'Chua dat'",
+          "fail_msg": "Điểm 4.0 phải xếp loại 'Chua dat'."
+        },
+        {
+          "name": "Kiểm tra mốc biên (diem = 5.0)",
+          "assert_code": "xep_loai(5.0) == 'Dat'",
+          "fail_msg": "Điểm 5.0 là mốc vừa đủ để đạt."
+        }
+      ]
+    }
+  ]
+}
