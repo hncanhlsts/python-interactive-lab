@@ -4,46 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Khám phá Lập trình Python</title>
+  
+  <!-- Tailwind CSS & Monaco Editor CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.css">
+  
+  <!-- Pyodide Core -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+
+  <style>
+    /* Chống bôi đen văn bản trên toàn trang */
+    * {
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Cho phép con trỏ soạn thảo hoạt động bình thường trong editor */
+    .monaco-editor, .monaco-editor * {
+      -webkit-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none">
 
   <!-- Header -->
   <header class="bg-slate-800 border-b border-slate-700 px-6 py-3 flex items-center justify-between">
     <div class="flex items-center space-x-3">
       <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
-      <h1 id="course-title" class="font-bold text-base md:text-lg text-emerald-400">Python Lab</h1>
+      <h1 id="course-title" class="font-bold text-base md:text-lg text-emerald-400">Python Sandbox</h1>
+      <span class="hidden md:inline-block text-[11px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded">Tự thực hành - Không Paste</span>
     </div>
-    <div id="runtime-status" class="text-xs text-amber-400">Đang tải Python Runtime...</div>
+    <div id="runtime-status" class="text-xs text-amber-400">Đang khởi tạo môi trường Python...</div>
   </header>
 
-  <!-- Layout 3 cột: Danh sách bài học - Chi tiết nhiệm vụ - Editor & Terminal -->
-  <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 max-w-[1600px] mx-auto w-full">
+  <!-- Bố cục 3 cột -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 max-w-[1600px] mx-auto w-full">
     
-    <!-- Cột 1: Danh sách bài học (Sidebar) -->
+    <!-- Cột 1: Danh sách bài học -->
     <aside class="lg:col-span-3 bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col shadow-lg h-fit lg:h-full">
-      <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Lộ trình bài học</h2>
-      <div id="lesson-list" class="space-y-2 overflow-y-auto max-h-[250px] lg:max-h-none flex-1">
-        <!-- Render tự động từ JSON -->
+      <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Lộ trình thử thách</h2>
+      <div id="lesson-list" class="space-y-2 overflow-y-auto max-h-[200px] lg:max-h-none flex-1 custom-scroll">
+        <!-- Tự động nạp từ curriculum.json -->
       </div>
     </aside>
 
-    <!-- Cột 2: Nhiệm vụ, Gợi ý bậc thang & Test Cases -->
+    <!-- Cột 2: Đề bài, Gợi ý bậc thang & Test Cases -->
     <section class="lg:col-span-4 flex flex-col gap-4">
+      
       <!-- Thẻ đề bài -->
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
         <span id="lesson-level" class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Mức độ</span>
-        <h2 id="lesson-title" class="text-lg font-bold mt-1 mb-2 text-white">Tiêu đề bài học</h2>
-        <div id="lesson-task" class="text-sm text-slate-300 leading-relaxed">Đang tải nội dung...</div>
+        <h2 id="lesson-title" class="text-lg font-bold mt-1 mb-2 text-white">Đang tải...</h2>
+        <div id="lesson-task" class="text-sm text-slate-300 leading-relaxed">Đang tải dữ liệu bài học...</div>
       </div>
 
-      <!-- Thẻ Gợi ý & Đánh giá thử sai -->
+      <!-- Thẻ Gợi ý & Phản hồi sư phạm -->
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex-1 flex flex-col">
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-sm font-bold text-slate-200 uppercase">💡 Phản hồi & Gợi ý</h3>
-          <button id="btn-hint" class="text-xs text-amber-400 hover:text-amber-300 underline cursor-pointer">Xem gợi ý bậc thang</button>
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">💡 Gợi ý & Phản hồi</h3>
+          <button id="btn-hint" class="text-xs text-amber-400 hover:text-amber-300 underline cursor-pointer">Xem gợi ý</button>
         </div>
 
         <div id="hint-container" class="hidden mb-3 p-3 bg-amber-950/40 border border-amber-800/60 rounded-lg text-xs text-amber-300 space-y-1.5">
@@ -51,7 +74,7 @@
         </div>
 
         <div id="pedagogy-feedback" class="text-xs text-slate-400 flex-1 leading-relaxed">
-          Nhấn <strong>"Chạy thử & Chấm điểm"</strong> để kiểm tra thuật toán của em.
+          Tự gõ từng dòng lệnh để hiểu rõ cú pháp. Nhấn <strong>"Chạy thử & Chấm điểm"</strong> khi hoàn tất.
         </div>
 
         <div class="mt-4 pt-3 border-t border-slate-700 text-xs">
@@ -63,37 +86,39 @@
       </div>
     </section>
 
-    <!-- Cột 3: Trình soạn thảo & Terminal -->
+    <!-- Cột 3: Code Editor & Console Output -->
     <section class="lg:col-span-5 flex flex-col gap-3">
-      <!-- Editor -->
+      
+      <!-- Editor Container -->
       <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg h-[340px] flex flex-col">
         <div class="bg-slate-800/90 px-4 py-2 border-b border-slate-700 flex justify-between text-xs text-slate-400">
           <span class="font-mono">main.py</span>
-          <span>Không hỗ trợ sao chép lời giải</span>
+          <span class="text-rose-400 font-semibold">🔒 Đã khóa tính năng Paste</span>
         </div>
         <div id="editor-container" class="flex-1 w-full"></div>
       </div>
 
-      <!-- Điều khiển -->
+      <!-- Nút điều khiển -->
       <div class="flex gap-2">
-        <button id="btn-run" disabled class="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+        <button id="btn-run" disabled class="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold py-2 px-4 rounded-lg text-sm transition duration-200">
           ▶ Chạy thử & Chấm điểm
         </button>
-        <button id="btn-reset" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded-lg text-sm transition">
+        <button id="btn-reset" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded-lg text-sm transition duration-200">
           ↺ Đặt lại
         </button>
       </div>
 
-      <!-- Terminal -->
+      <!-- Terminal Output -->
       <div class="bg-black/90 border border-slate-800 rounded-xl p-4 font-mono text-xs flex-1 min-h-[160px] flex flex-col shadow-inner">
         <div class="text-slate-500 pb-2 border-b border-slate-800 mb-2 flex justify-between">
           <span>Terminal Output</span>
           <span id="exec-time" class="text-[10px]"></span>
         </div>
-        <pre id="console-output" class="text-slate-300 whitespace-pre-wrap overflow-y-auto flex-1"></pre>
+        <pre id="console-output" class="text-slate-300 whitespace-pre-wrap custom-scroll overflow-y-auto flex-1"></pre>
       </div>
+
     </section>
-  </div>
+  </main>
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
@@ -103,57 +128,87 @@
     let pyodideInstance = null;
     let editor = null;
 
-    // 1. Khởi tạo Editor
+    // 1. Chặn toàn diện hành vi Copy / Chuột phải trên toàn trang
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('copy', (e) => e.preventDefault());
+
+    // 2. Khởi tạo Monaco Editor với các chốt chặn Paste
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('editor-container'), {
-        value: '# Đang tải bài học...',
+        value: '# Đang tải bài tập...',
         language: 'python',
         theme: 'vs-dark',
         fontSize: 13,
         minimap: { enabled: false },
-        automaticLayout: true
+        automaticLayout: true,
+        contextmenu: false // Vô hiệu hóa chuột phải trong editor
       });
+
+      // Chặn Ctrl+V / Cmd+V
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {
+        triggerAntiCheatAlert("Hãy tự tay gõ từng dòng code để hiểu cú pháp, không sử dụng tính năng dán (Paste)!");
+      });
+
+      // Chặn Shift+Insert
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Insert, () => {
+        triggerAntiCheatAlert("Phím tắt dán (Shift + Insert) đã bị vô hiệu hóa.");
+      });
+
+      // Chặn Paste qua sự kiện DOM và Drag & Drop
+      const editorDom = document.getElementById('editor-container');
+      editorDom.addEventListener('paste', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerAntiCheatAlert("Thao tác dán văn bản đã bị chặn!");
+      }, true);
+
+      editorDom.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerAntiCheatAlert("Không hỗ trợ kéo thả văn bản vào trình soạn thảo!");
+      }, true);
+
       loadCurriculum();
     });
 
-    // 2. Khởi tạo Pyodide
+    // 3. Khởi tạo Pyodide Runtime
     async function initPyodide() {
       try {
         pyodideInstance = await loadPyodide();
-        document.getElementById('runtime-status').innerText = '● Python Ready';
+        document.getElementById('runtime-status').innerText = '● Python 3.11 Ready';
         document.getElementById('runtime-status').className = 'text-xs text-emerald-400';
         document.getElementById('btn-run').disabled = false;
       } catch (err) {
-        document.getElementById('runtime-status').innerText = 'Lỗi nạp Python';
+        document.getElementById('runtime-status').innerText = 'Lỗi nạp môi trường Python';
         document.getElementById('runtime-status').className = 'text-xs text-rose-500';
       }
     }
     initPyodide();
 
-    // 3. Tải file JSON bài tập
+    // 4. Nạp dữ liệu từ curriculum.json
     async function loadCurriculum() {
       try {
         const response = await fetch('curriculum.json');
         curriculum = await response.json();
         document.getElementById('course-title').innerText = curriculum.course_title;
         renderSidebar();
-        if (curriculum.lessons.length > 0) {
+        if (curriculum.lessons && curriculum.lessons.length > 0) {
           selectLesson(curriculum.lessons[0].id);
         }
       } catch (e) {
-        console.error("Không thể nạp file curriculum.json:", e);
+        document.getElementById('lesson-task').innerText = 'Không thể nạp file curriculum.json. Vui lòng kiểm tra lại cấu trúc file.';
       }
     }
 
-    // 4. Render danh sách bài học
+    // 5. Render danh sách bài học
     function renderSidebar() {
       const listContainer = document.getElementById('lesson-list');
       listContainer.innerHTML = '';
       curriculum.lessons.forEach((les, idx) => {
         const btn = document.createElement('button');
         btn.id = `sidebar-item-${les.id}`;
-        btn.className = `w-full text-left p-3 rounded-lg text-xs transition border border-slate-700/50 bg-slate-900/60 hover:bg-slate-700/60 text-slate-300`;
+        btn.className = `w-full text-left p-2.5 rounded-lg text-xs transition border border-slate-700/60 bg-slate-900/60 hover:bg-slate-700/60 text-slate-300`;
         btn.innerHTML = `
           <div class="font-bold text-slate-200">Bài ${idx + 1}: ${les.title}</div>
           <div class="text-[11px] text-slate-400 mt-0.5">${les.level}</div>
@@ -163,29 +218,25 @@
       });
     }
 
-    // 5. Chuyển đổi bài học được chọn
+    // 6. Chuyển bài học
     function selectLesson(lessonId) {
       currentLesson = curriculum.lessons.find(l => l.id === lessonId);
       if (!currentLesson) return;
 
-      // Đổi màu bài đang chọn
       document.querySelectorAll('#lesson-list button').forEach(b => {
         b.classList.remove('border-emerald-500', 'bg-slate-700/80');
       });
       document.getElementById(`sidebar-item-${lessonId}`).classList.add('border-emerald-500', 'bg-slate-700/80');
 
-      // Cập nhật UI
       document.getElementById('lesson-level').innerText = currentLesson.level;
       document.getElementById('lesson-title').innerText = currentLesson.title;
       document.getElementById('lesson-task').innerHTML = currentLesson.task_description;
       editor.setValue(currentLesson.initial_code);
 
-      // Cập nhật gợi ý
       const hintBox = document.getElementById('hint-container');
       hintBox.classList.add('hidden');
       hintBox.innerHTML = currentLesson.hints.map(h => `<p>${h}</p>`).join('');
 
-      // Render danh sách Test Cases
       const testList = document.getElementById('test-case-list');
       testList.innerHTML = currentLesson.test_cases.map((t, idx) => `
         <div id="test-row-${idx}" class="flex items-center gap-2 text-slate-400">
@@ -193,17 +244,15 @@
         </div>
       `).join('');
 
-      document.getElementById('pedagogy-feedback').innerHTML = 'Hãy đọc kỹ yêu cầu và thử sửa mã nguồn.';
+      document.getElementById('pedagogy-feedback').innerHTML = 'Tự gõ từng dòng lệnh để hiểu rõ cú pháp. Nhấn <strong>"Chạy thử & Chấm điểm"</strong> khi hoàn tất.';
       document.getElementById('console-output').innerText = '';
     }
 
-    // Toggle Gợi ý
     document.getElementById('btn-hint').onclick = () => {
-      const hintBox = document.getElementById('hint-container');
-      hintBox.classList.toggle('hidden');
+      document.getElementById('hint-container').classList.toggle('hidden');
     };
 
-    // 6. Thực thi code & Chấm điểm động từ JSON
+    // 7. Thực thi kiểm thử tự động
     document.getElementById('btn-run').addEventListener('click', async () => {
       if (!currentLesson || !pyodideInstance) return;
 
@@ -211,7 +260,6 @@
       const consoleOut = document.getElementById('console-output');
       consoleOut.innerHTML = '<span class="text-slate-500">Đang chạy kiểm thử...</span>';
 
-      // Tạo test harness tự động từ danh sách test_cases trong JSON
       const assertionsCode = currentLesson.test_cases.map((tc, idx) => `
     try:
         t_${idx} = bool(${tc.assert_code})
@@ -265,7 +313,6 @@ result_data
       }
     });
 
-    // 7. Cập nhật UI Test cases & Phản hồi sư phạm
     function handleTestResults(results) {
       let allPassed = true;
       let firstFailedMsg = "";
@@ -293,12 +340,20 @@ result_data
     function handleErrorFeedback(type, msg) {
       const feedback = document.getElementById('pedagogy-feedback');
       let hint = `Đoạn mã dừng lại do lỗi <code>${type}</code> (${msg}).`;
-      if (type === "IndentationError") hint = "Lỗi thụt lề: Các câu lệnh con bên trong hàm hoặc khối if/else cần lùi vào 4 dấu cách.";
-      if (type === "SyntaxError") hint = "Lỗi cú pháp: Kiểm tra lại dấu hai chấm <code>:</code> hoặc các cặp ngoặc.";
+      if (type === "IndentationError") hint = "Lỗi thụt lề: Các câu lệnh con bên trong hàm hoặc khối if/else cần lùi vào 4 khoảng trắng.";
+      if (type === "SyntaxError") hint = "Lỗi cú pháp: Kiểm tra lại dấu hai chấm <code>:</code> hoặc các cặp ngoặc đóng/mở.";
       feedback.innerHTML = `<div class="p-2.5 bg-amber-950/50 border border-amber-800/60 rounded text-amber-300">${hint}</div>`;
     }
 
-    // Đặt lại code ban đầu
+    function triggerAntiCheatAlert(msg) {
+      const feedback = document.getElementById('pedagogy-feedback');
+      feedback.innerHTML = `
+        <div class="p-2.5 bg-amber-950/80 border border-amber-500 rounded text-amber-200 animate-pulse">
+          ⚠️ <strong>Nhắc nhở:</strong> ${msg}
+        </div>
+      `;
+    }
+
     document.getElementById('btn-reset').onclick = () => {
       if (currentLesson) {
         editor.setValue(currentLesson.initial_code);
