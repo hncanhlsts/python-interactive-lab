@@ -12,6 +12,9 @@
   <!-- Pyodide Core -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 
+  <!-- Nạp dữ liệu bài học qua JS (Chống lỗi CORS/Fetch) -->
+  <script src="curriculum.js"></script>
+
   <style>
     * { 
       -webkit-user-select: none; 
@@ -45,7 +48,7 @@
   <!-- Bố cục chính -->
   <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 max-w-[1600px] mx-auto w-full">
     
-    <!-- CỘT TRÁI: Menu phân cấp Bài học > Bài tập -->
+    <!-- CỘT TRÁI: Lộ trình bài học -->
     <aside class="lg:col-span-4 bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col shadow-lg h-fit lg:h-[calc(100vh-5.5rem)]">
       <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
         <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lộ trình bài học</h2>
@@ -53,9 +56,7 @@
       </div>
 
       <!-- Danh sách bài tập -->
-      <div id="lesson-accordion-list" class="space-y-3 overflow-y-auto flex-1 custom-scroll pr-1">
-        <!-- Render động từ curriculum -->
-      </div>
+      <div id="lesson-accordion-list" class="space-y-3 overflow-y-auto flex-1 custom-scroll pr-1"></div>
 
       <!-- Gợi ý & Cảnh báo Anti-Paste -->
       <div class="mt-3 pt-3 border-t border-slate-700 flex flex-col">
@@ -68,7 +69,7 @@
       </div>
     </aside>
 
-    <!-- CỘT PHẢI: Đề bài, Trình soạn thảo & Terminal Console -->
+    <!-- CỘT PHẢI: Đề bài, Editor & Terminal Console -->
     <section class="lg:col-span-8 flex flex-col gap-3 h-fit lg:h-[calc(100vh-5.5rem)]">
       
       <!-- Thẻ tóm tắt bài tập & Test Cases -->
@@ -130,147 +131,6 @@
   <!-- Monaco & Pyodide Application Logic -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
   <script>
-    // Dữ liệu mặc định đồng bộ (Đảm bảo 100% luôn chạy được kể cả khi mở file:/// trực tiếp)
-    const defaultCurriculum = {
-      "course_title": "Khám phá Lập trình Python (Thử - Sai)",
-      "lessons": [
-        {
-          "lesson_id": "lesson-1",
-          "lesson_title": "Bài 1: Biến, Kiểu dữ liệu & Phép toán cơ bản",
-          "exercises": [
-            {
-              "id": "ex-1-1",
-              "title": "1.1 Sửa lỗi cú pháp tính diện tích",
-              "level": "Mức 1: Sửa lỗi",
-              "description": "Hàm <code>tinh_dien_tich(dai, rong)</code> dưới đây đang bị thiếu dấu hai chấm <code>:</code> và lỗi thụt lề. Hãy sửa lại để hàm trả về diện tích hình chữ nhật.",
-              "initial_code": "def tinh_dien_tich(dai, rong)\nreturn dai * rong",
-              "hints": ["Dòng định nghĩa hàm `def` phải kết thúc bằng dấu hai chấm `:`", "Dòng lệnh `return` phải thụt lề vào 4 khoảng trắng."],
-              "test_cases": [
-                { "name": "Dài 5, Rộng 3 (Diện tích = 15)", "assert_code": "tinh_dien_tich(5, 3) == 15", "fail_msg": "Diện tích hình chữ nhật 5 x 3 phải bằng 15." },
-                { "name": "Dài 10, Rộng 8 (Diện tích = 80)", "assert_code": "tinh_dien_tich(10, 8) == 80", "fail_msg": "Diện tích hình chữ nhật 10 x 8 phải bằng 80." }
-              ]
-            },
-            {
-              "id": "ex-1-2",
-              "title": "1.2 Tính chu vi hình tròn",
-              "level": "Mức 2: Tính toán số học",
-              "description": "Viết hàm <code>chu_vi_tron(r)</code> tính chu vi hình tròn bán kính <code>r</code> theo công thức: <b>2 * 3.14 * r</b>.",
-              "initial_code": "def chu_vi_tron(r):\n    # Viết công thức tính chu vi và trả về kết quả\n    pass",
-              "hints": ["Công thức: `cv = 2 * 3.14 * r`", "Dùng `return cv` để trả về giá trị."],
-              "test_cases": [
-                { "name": "Bán kính r = 5", "assert_code": "round(chu_vi_tron(5), 2) == 31.4", "fail_msg": "Với r = 5, chu vi phải là 31.4." },
-                { "name": "Bán kính r = 2.5", "assert_code": "round(chu_vi_tron(2.5), 2) == 15.7", "fail_msg": "Với r = 2.5, chu vi phải là 15.7." }
-              ]
-            },
-            {
-              "id": "ex-1-3",
-              "title": "1.3 Ép kiểu chuỗi sang số nguyên",
-              "level": "Mức 3: Chuyển đổi kiểu dữ liệu",
-              "description": "Hàm <code>tong_hai_so(a_str, b_str)</code> nhận vào 2 chuỗi số. Hãy ép kiểu sang số nguyên bằng <code>int()</code> và trả về tổng của chúng.",
-              "initial_code": "def tong_hai_so(a_str, b_str):\n    # Chú ý: a_str + b_str sẽ nối chuỗi chứ không cộng số\n    return a_str + b_str",
-              "hints": ["Dùng `int(a_str)` để chuyển chuỗi sang số nguyên.", "Trả về: `return int(a_str) + int(b_str)`"],
-              "test_cases": [
-                { "name": "Cộng '12' và '8' (Tổng = 20)", "assert_code": "tong_hai_so('12', '8') == 20", "fail_msg": "'12' + '8' phải trả về số 20, không phải '128'." },
-                { "name": "Cộng '100' và '250' (Tổng = 350)", "assert_code": "tong_hai_so('100', '250') == 350", "fail_msg": "Tổng của '100' và '250' phải là 350." }
-              ]
-            },
-            {
-              "id": "ex-1-4",
-              "title": "1.4 Đổi phút sang giờ và phút",
-              "level": "Mức 4: Toán tử chia lấy nguyên và dư",
-              "description": "Viết hàm <code>doi_gio(tong_phut)</code> nhận vào số phút và trả về chuỗi theo mẫu: <code>'{gio} gio {phut} phut'</code>.",
-              "initial_code": "def doi_gio(tong_phut):\n    # Dùng // lấy số giờ, % lấy số phút còn dư\n    pass",
-              "hints": ["Số giờ: `gio = tong_phut // 60`", "Số phút dư: `phut = tong_phut % 60`", "Dùng f-string: `return f'{gio} gio {phut} phut'`"],
-              "test_cases": [
-                { "name": "130 phút", "assert_code": "doi_gio(130) == '2 gio 10 phut'", "fail_msg": "130 phút phải đổi thành '2 gio 10 phut'." },
-                { "name": "45 phút", "assert_code": "doi_gio(45) == '0 gio 45 phut'", "fail_msg": "45 phút phải đổi thành '0 gio 45 phut'." }
-              ]
-            },
-            {
-              "id": "ex-1-5",
-              "title": "1.5 Tạo thông điệp chào mừng",
-              "level": "Mức 5: Xử lý chuỗi",
-              "description": "Viết hàm <code>tao_loi_chao(ten, tuoi)</code> nhận vào <code>ten</code> (chuỗi) và <code>tuoi</code> (số nguyên), trả về chuỗi: <code>'Ban {ten} nam nay {tuoi} tuoi.'</code>",
-              "initial_code": "def tao_loi_chao(ten, tuoi):\n    # Trả về câu hoàn chỉnh theo mẫu\n    pass",
-              "hints": ["Dùng cú pháp f-string: `return f'Ban {ten} nam nay {tuoi} tuoi.'`"],
-              "test_cases": [
-                { "name": "Nam, 12 tuổi", "assert_code": "tao_loi_chao('Nam', 12) == 'Ban Nam nam nay 12 tuoi.'", "fail_msg": "Chuỗi trả về chưa đúng định dạng hoặc sai khoảng trắng." },
-                { "name": "Linh, 15 tuổi", "assert_code": "tao_loi_chao('Linh', 15) == 'Ban Linh nam nay 15 tuoi.'", "fail_msg": "Kiểm tra lại dấu chấm ở cuối câu." }
-              ]
-            }
-          ]
-        },
-        {
-          "lesson_id": "lesson-2",
-          "lesson_title": "Bài 2: Cấu trúc Rẽ nhánh (if - elif - else)",
-          "exercises": [
-            {
-              "id": "ex-2-1",
-              "title": "2.1 Tìm số lớn hơn",
-              "level": "Mức 1: if - else cơ bản",
-              "description": "Viết hàm <code>tim_max(a, b)</code> nhận vào 2 số và trả về số có giá trị lớn hơn.",
-              "initial_code": "def tim_max(a, b):\n    if a > b:\n        return a\n    # Hoàn thiện nhánh còn lại\n",
-              "hints": ["Thêm nhánh `else:` và `return b`."],
-              "test_cases": [
-                { "name": "a = 15, b = 7", "assert_code": "tim_max(15, 7) == 15", "fail_msg": "Số lớn hơn giữa 15 và 7 phải là 15." },
-                { "name": "a = 4, b = 9", "assert_code": "tim_max(4, 9) == 9", "fail_msg": "Số lớn hơn giữa 4 và 9 phải là 9." }
-              ]
-            },
-            {
-              "id": "ex-2-2",
-              "title": "2.2 Xét dấu của một số",
-              "level": "Mức 2: if - elif - else",
-              "description": "Viết hàm <code>xet_dau(n)</code> trả về: <code>'Duong'</code> nếu n > 0, <code>'Am'</code> nếu n < 0, và <code>'Khong'</code> nếu n == 0.",
-              "initial_code": "def xet_dau(n):\n    # Dùng cấu trúc if - elif - else\n    pass",
-              "hints": ["Dùng `if n > 0: return 'Duong'`", "Dùng `elif n < 0: return 'Am'`", "Nhánh `else: return 'Khong'`"],
-              "test_cases": [
-                { "name": "Số 10 (Dương)", "assert_code": "xet_dau(10) == 'Duong'", "fail_msg": "10 phải trả về 'Duong'." },
-                { "name": "Số -5 (Âm)", "assert_code": "xet_dau(-5) == 'Am'", "fail_msg": "-5 phải trả về 'Am'." },
-                { "name": "Số 0 (Không)", "assert_code": "xet_dau(0) == 'Khong'", "fail_msg": "0 phải trả về 'Khong'." }
-              ]
-            },
-            {
-              "id": "ex-2-3",
-              "title": "2.3 Kiểm tra năm nhuận",
-              "level": "Mức 3: Kết hợp điều kiện logic",
-              "description": "Viết hàm <code>la_nam_nhuan(nam)</code> trả về <code>True</code> nếu là năm nhuận, ngược lại trả về <code>False</code>.<br><i>Năm nhuận là năm chia hết cho 400 HOẶC (chia hết cho 4 và không chia hết cho 100).</i>",
-              "initial_code": "def la_nam_nhuan(nam):\n    # Viết biểu thức logic kiểm tra năm nhuận\n    pass",
-              "hints": ["Dùng điều kiện: `(nam % 400 == 0) or (nam % 4 == 0 and nam % 100 != 0)`"],
-              "test_cases": [
-                { "name": "Năm 2024 (Năm nhuận)", "assert_code": "la_nam_nhuan(2024) is True", "fail_msg": "2024 là năm nhuận." },
-                { "name": "Năm 1900 (Không nhuận)", "assert_code": "la_nam_nhuan(1900) is False", "fail_msg": "1900 chia hết cho 100 nhưng không chia hết cho 400 nên không phải năm nhuận." }
-              ]
-            },
-            {
-              "id": "ex-2-4",
-              "title": "2.4 Tính tiền cước Taxi",
-              "level": "Mức 4: Tính toán đa phân đoạn",
-              "description": "Viết hàm <code>tien_taxi(km)</code> tính tiền cước di chuyển:<br>• 1 km đầu tiên: <b>10.000đ</b><br>• Từ km thứ 2 đến km thứ 10: <b>8.000đ/km</b><br>• Từ km thứ 11 trở đi: <b>6.000đ/km</b>",
-              "initial_code": "def tien_taxi(km):\n    if km <= 1:\n        return 10000\n    elif km <= 10:\n        return 10000 + (km - 1) * 8000\n    else:\n        # Viết tiếp công thức tính tiền khi km > 10\n        pass",
-              "hints": ["Khi km > 10: `return 10000 + 9 * 8000 + (km - 10) * 6000`"],
-              "test_cases": [
-                { "name": "1 km (10.000đ)", "assert_code": "tien_taxi(1) == 10000", "fail_msg": "1 km giá 10000." },
-                { "name": "5 km (42.000đ)", "assert_code": "tien_taxi(5) == 42000", "fail_msg": "5 km = 10000 + 4 * 8000 = 42000." },
-                { "name": "12 km (94.000đ)", "assert_code": "tien_taxi(12) == 94000", "fail_msg": "12 km = 10000 + 72000 + 2 * 6000 = 94000." }
-              ]
-            },
-            {
-              "id": "ex-2-5",
-              "title": "2.5 Kiểm tra 3 cạnh tam giác",
-              "level": "Mức 5: Điều kiện hình học",
-              "description": "Viết hàm <code>la_tam_giac(a, b, c)</code> trả về <code>True</code> nếu 3 cạnh $a, b, c > 0$ tạo thành tam giác hợp lệ (tổng 2 cạnh bất kỳ luôn lớn hơn cạnh còn lại), ngược lại trả về <code>False</code>.",
-              "initial_code": "def la_tam_giac(a, b, c):\n    # Kiểm tra điều kiện bất đẳng thức tam giác\n    pass",
-              "hints": ["Cả 3 điều kiện phải đồng thời đúng: `a + b > c and a + c > b and b + c > a`"],
-              "test_cases": [
-                { "name": "Bộ ba (3, 4, 5)", "assert_code": "la_tam_giac(3, 4, 5) is True", "fail_msg": "(3, 4, 5) là tam giác hợp lệ." },
-                { "name": "Bộ ba (1, 2, 3)", "assert_code": "la_tam_giac(1, 2, 3) is False", "fail_msg": "1 + 2 = 3 (không lớn hơn 3) nên không tạo thành tam giác." }
-              ]
-            }
-          ]
-        }
-      ]
-    };
-
     let curriculum = null;
     let flatExercises = [];
     let currentExercise = null;
@@ -328,7 +188,7 @@
         }
       });
 
-      loadCurriculum();
+      initCurriculum();
     });
 
     // 3. KHỞI TẠO PYODIDE
@@ -366,17 +226,16 @@
     }
     initPyodide();
 
-    // 4. NẠP DỮ LIỆU BÀI HỌC
-    async function loadCurriculum() {
-      try {
-        const res = await fetch('curriculum.json');
-        if (!res.ok) throw new Error('Không thể fetch curriculum.json');
-        curriculum = await res.json();
-      } catch (err) {
-        curriculum = defaultCurriculum;
+    // 4. NẠP DỮ LIỆU TỪ BIẾN TOÀN CỤC window.CURRICULUM_DATA
+    function initCurriculum() {
+      if (!window.CURRICULUM_DATA) {
+        document.getElementById('current-desc').innerText = 'Lỗi: Không tìm thấy curriculum.js. Hãy đảm bảo file curriculum.js cùng thư mục với index.html.';
+        return;
       }
 
+      curriculum = window.CURRICULUM_DATA;
       document.getElementById('course-title').innerText = curriculum.course_title;
+
       flatExercises = [];
       curriculum.lessons.forEach(l => {
         l.exercises.forEach(e => flatExercises.push(e));
