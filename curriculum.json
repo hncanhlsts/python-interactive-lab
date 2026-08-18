@@ -1,45 +1,50 @@
 {
   "course_title": "Khám phá Lập trình Python (Thử - Sai)",
-  "topics": [
+  "lessons": [
     {
-      "topic_id": "topic-1",
-      "topic_name": "Chủ đề 1: Biến & Nhập/Xuất Dữ liệu (input/print)",
+      "lesson_id": "lesson-1",
+      "lesson_title": "Bài 1: Làm quen & Cú pháp cơ bản",
       "exercises": [
         {
           "id": "ex-1-1",
-          "title": "Bài 1: Lời chào tương tác",
-          "level": "Cơ bản",
-          "description": "Viết chương trình yêu cầu nhập tên của người dùng bằng hàm <code>input()</code>, sau đó in ra màn hình: <code>Xin chao [Ten]!</code>",
-          "initial_code": "# Nhập tên từ bàn phím và in lời chào\nten = input(\"Nhap ten cua ban: \")\n# Em hãy hoàn thiện dòng print bên dưới:\n",
-          "hints": [
-            "Dùng lệnh print(\"Xin chao\", ten + \"!\") hoặc f-string: print(f\"Xin chao {ten}!\")"
+          "title": "Thực hành 1.1: Sửa lỗi cú pháp & thụt lề",
+          "level": "Mức 1: Debugging",
+          "description": "Hàm <code>tinh_tien(tuoi)</code> đang bị lỗi cú pháp. Sửa lại để trả về <code>0</code> nếu tuổi < 6, ngược lại trả về <code>50000</code>.",
+          "initial_code": "def tinh_tien(tuoi)\nif tuoi < 6:\nreturn 0\nelse:\nreturn 50000",
+          "hints": ["Kiểm tra dấu hai chấm ':' ở dòng def, if, else.", "Thụt lề 4 dấu cách cho các dòng lệnh con bên trong."],
+          "test_cases": [
+            { "name": "Tuổi = 4 (Trẻ em)", "assert_code": "tinh_tien(4) == 0", "fail_msg": "Tuổi < 6 phải trả về 0." },
+            { "name": "Tuổi = 10 (Người lớn)", "assert_code": "tinh_tien(10) == 50000", "fail_msg": "Tuổi >= 6 phải trả về 50000." }
           ]
         },
         {
           "id": "ex-1-2",
-          "title": "Bài 2: Tính tuổi năm sau",
-          "level": "Cơ bản",
-          "description": "Nhập tuổi hiện tại của một người (số nguyên). Hãy in ra tuổi của người đó vào năm sau.",
-          "initial_code": "tuoi_str = input(\"Nhap tuoi hien tai: \")\n# Lưu ý: Giá trị từ input() là chuỗi (str), cần ép kiểu sang số nguyên (int)\n",
-          "hints": [
-            "Dùng hàm int() để ép kiểu: tuoi = int(tuoi_str)",
-            "Tính tuổi năm sau: tuoi_sau = tuoi + 1"
+          "title": "Thực hành 1.2: Lời chào tương tác (input)",
+          "level": "Mức 2: Nhập xuất",
+          "description": "Viết hàm <code>chao_hoi(ten)</code> nhận vào tên và trả về chuỗi <code>'Xin chao, ' + ten + '!'</code>.",
+          "initial_code": "def chao_hoi(ten):\n    # Hoàn thiện logic trả về chuỗi lời chào\n    pass",
+          "hints": ["Sử dụng f-string: return f'Xin chao, {ten}!' hoặc ghép chuỗi '+'."],
+          "test_cases": [
+            { "name": "Chào 'Nam'", "assert_code": "chao_hoi('Nam') == 'Xin chao, Nam!'", "fail_msg": "Định dạng chuỗi chưa chính xác." },
+            { "name": "Chào 'Linh'", "assert_code": "chao_hoi('Linh') == 'Xin chao, Linh!'", "fail_msg": "Kiểm tra dấu phẩy và dấu chấm than." }
           ]
         }
       ]
     },
     {
-      "topic_id": "topic-2",
-      "topic_name": "Chủ đề 2: Cấu trúc Rẽ nhánh (if - elif - else)",
+      "lesson_id": "lesson-2",
+      "lesson_title": "Bài 2: Cấu trúc rẽ nhánh (if - elif - else)",
       "exercises": [
         {
           "id": "ex-2-1",
-          "title": "Bài 1: Kiểm tra chẵn lẻ với dữ liệu nhập",
-          "level": "Nâng cao một chút",
-          "description": "Nhập vào một số nguyên <code>n</code>. In ra màn hình <code>Chan</code> nếu số đó chia hết cho 2, ngược lại in <code>Le</code>.",
-          "initial_code": "n = int(input(\"Nhap mot so nguyen: \"))\nif n % 2 == 0:\n    print(\"Chan\")\nelse:\n    print(\"Le\")",
-          "hints": [
-            "Toán tử % dùng để lấy số dư của phép chia."
+          "title": "Thực hành 2.1: Xếp loại học lực",
+          "level": "Mức 2: Hoàn thiện logic",
+          "description": "Viết hàm <code>xep_loai(diem)</code> trả về <code>'Dat'</code> nếu điểm >= 5.0, ngược lại trả về <code>'Chua dat'</code>.",
+          "initial_code": "def xep_loai(diem):\n    # Viết câu lệnh điều kiện if - else tại đây\n    pass",
+          "hints": ["Dùng 'if diem >= 5.0:' để xét điểm đạt."],
+          "test_cases": [
+            { "name": "Điểm 7.0 (Đạt)", "assert_code": "xep_loai(7.0) == 'Dat'", "fail_msg": "Điểm 7.0 phải trả về 'Dat'." },
+            { "name": "Điểm 4.5 (Chưa đạt)", "assert_code": "xep_loai(4.5) == 'Chua dat'", "fail_msg": "Điểm 4.5 phải trả về 'Chua dat'." }
           ]
         }
       ]
