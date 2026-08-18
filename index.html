@@ -123,16 +123,36 @@
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
   <script>
-    let curriculum = null;
-    let currentLesson = null;
-    let pyodideInstance = null;
-    let editor = null;
+    let isSystemUpdating = false; // Cờ đánh dấu khi hệ thống tự nạp bài (tránh chặn nhầm)
 
-    // 1. Chặn toàn diện hành vi Copy / Chuột phải trên toàn trang
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-    document.addEventListener('copy', (e) => e.preventDefault());
+    // 1. CHẶN TOÀN CỤC Ở CẤP ĐỘ WINDOW (Pha Capture: true)
+    // Chặn phím tắt Ctrl+V / Cmd+V / Shift+Insert
+    window.addEventListener('keydown', (e) => {
+      const isPasteKey = (e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V');
+      const isShiftInsert = e.shiftKey && e.key === 'Insert';
 
-    // 2. Khởi tạo Monaco Editor với các chốt chặn Paste
+      if (isPasteKey || isShiftInsert) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        triggerAntiCheatAlert("⚠️ Tính năng Paste (Ctrl+V) đã bị vô hiệu hóa. Em hãy tự tay gõ từng dòng lệnh!");
+      }
+    }, true);
+
+    // Chặn sự kiện dán (Paste Event) ở mọi ngóc ngách trình duyệt
+    window.addEventListener('paste', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      triggerAntiCheatAlert("⚠️ Thao tác dán code đã bị chặn!");
+    }, true);
+
+    // Chặn kéo - thả (Drag & Drop) code từ ngoài vào
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      triggerAntiCheatAlert("⚠️ Không thể kéo thả code vào bài làm!");
+    }, true);
+
+    // 2. KHỞI TẠO MONACO EDITOR VÀ BỘ LỌC NỘI DUNG (Layer 2)
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('editor-container'), {
@@ -142,35 +162,59 @@
         fontSize: 13,
         minimap: { enabled: false },
         automaticLayout: true,
-        contextmenu: false // Vô hiệu hóa chuột phải trong editor
+        contextmenu: false // Tắt hoàn toàn menu chuột phải trong editor
       });
 
-      // Chặn Ctrl+V / Cmd+V
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {
-        triggerAntiCheatAlert("Hãy tự tay gõ từng dòng code để hiểu cú pháp, không sử dụng tính năng dán (Paste)!");
+      // Lớp bảo vệ 2: Phát hiện chèn văn bản hàng loạt (Bulk Text Insertion)
+      editor.onDidChangeModelContent((e) => {
+        if (isSystemUpdating) return; // Bỏ qua nếu do hệ thống nạp đề bài
+
+        // Kiểm tra xem có đoạn văn bản dài (> 3 ký tự hoặc chứa xuống dòng) được chèn vào 1 lúc không
+        const isBulkInsert = e.changes.some(change => change.text.length > 3 || change.text.includes('\n'));
+        
+        if (isBulkInsert && !e.isUndoing) {
+          // Tự động lùi lại thao tác (Undo) ngay lập tức
+          editor.trigger('anti-cheat', 'undo', null);
+          triggerAntiCheatAlert("⚠️ Phát hiện hành vi chèn nhiều dòng code cùng lúc. Vui lòng tự gõ từng ký tự!");
+        }
       });
-
-      // Chặn Shift+Insert
-      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Insert, () => {
-        triggerAntiCheatAlert("Phím tắt dán (Shift + Insert) đã bị vô hiệu hóa.");
-      });
-
-      // Chặn Paste qua sự kiện DOM và Drag & Drop
-      const editorDom = document.getElementById('editor-container');
-      editorDom.addEventListener('paste', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        triggerAntiCheatAlert("Thao tác dán văn bản đã bị chặn!");
-      }, true);
-
-      editorDom.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        triggerAntiCheatAlert("Không hỗ trợ kéo thả văn bản vào trình soạn thảo!");
-      }, true);
 
       loadCurriculum();
     });
+
+    // 3. CẬP NHẬT HÀM SELECT LESSON (Bật cờ isSystemUpdating khi nạp bài)
+    function selectLesson(lessonId) {
+      currentLesson = curriculum.lessons.find(l => l.id === lessonId);
+      if (!currentLesson) return;
+
+      document.querySelectorAll('#lesson-list button').forEach(b => {
+        b.classList.remove('border-emerald-500', 'bg-slate-700/80');
+      });
+      document.getElementById(`sidebar-item-${lessonId}`).classList.add('border-emerald-500', 'bg-slate-700/80');
+
+      document.getElementById('lesson-level').innerText = currentLesson.level;
+      document.getElementById('lesson-title').innerText = currentLesson.title;
+      document.getElementById('lesson-task').innerHTML = currentLesson.task_description;
+
+      // Bật cờ để không bị bộ lọc Anti-paste chặn nhầm khi nạp bài mẫu
+      isSystemUpdating = true;
+      editor.setValue(currentLesson.initial_code);
+      isSystemUpdating = false;
+
+      const hintBox = document.getElementById('hint-container');
+      hintBox.classList.add('hidden');
+      hintBox.innerHTML = currentLesson.hints.map(h => `<p>${h}</p>`).join('');
+
+      const testList = document.getElementById('test-case-list');
+      testList.innerHTML = currentLesson.test_cases.map((t, idx) => `
+        <div id="test-row-${idx}" class="flex items-center gap-2 text-slate-400">
+          <span>⚪</span> <span>${t.name}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('pedagogy-feedback').innerHTML = 'Tự gõ từng dòng lệnh để hiểu rõ cú pháp. Nhấn <strong>"Chạy thử & Chấm điểm"</strong> khi hoàn tất.';
+      document.getElementById('console-output').innerText = '';
+    }
 
     // 3. Khởi tạo Pyodide Runtime
     async function initPyodide() {
