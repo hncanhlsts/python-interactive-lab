@@ -45,7 +45,7 @@
   <!-- Bố cục chính -->
   <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 max-w-[1600px] mx-auto w-full">
     
-    <!-- CỘT TRÁI: Lộ trình bài học -->
+    <!-- CỘT TRÁI: Menu phân cấp Bài học > Bài tập -->
     <aside class="lg:col-span-4 bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col shadow-lg h-fit lg:h-[calc(100vh-5.5rem)]">
       <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
         <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lộ trình bài học</h2>
@@ -54,7 +54,7 @@
 
       <!-- Danh sách bài tập -->
       <div id="lesson-accordion-list" class="space-y-3 overflow-y-auto flex-1 custom-scroll pr-1">
-        <!-- Render động từ JSON -->
+        <!-- Render động từ curriculum -->
       </div>
 
       <!-- Gợi ý & Cảnh báo Anti-Paste -->
@@ -68,7 +68,7 @@
       </div>
     </aside>
 
-    <!-- CỘT PHẢI: Đề bài, Editor & Terminal Console -->
+    <!-- CỘT PHẢI: Đề bài, Trình soạn thảo & Terminal Console -->
     <section class="lg:col-span-8 flex flex-col gap-3 h-fit lg:h-[calc(100vh-5.5rem)]">
       
       <!-- Thẻ tóm tắt bài tập & Test Cases -->
@@ -130,7 +130,7 @@
   <!-- Monaco & Pyodide Application Logic -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
   <script>
-    // Dữ liệu dự phòng mặc định (Fallback) nếu không load được curriculum.json qua fetch
+    // Dữ liệu mặc định đồng bộ (Đảm bảo 100% luôn chạy được kể cả khi mở file:/// trực tiếp)
     const defaultCurriculum = {
       "course_title": "Khám phá Lập trình Python (Thử - Sai)",
       "lessons": [
@@ -280,7 +280,7 @@
 
     let completedExercises = JSON.parse(localStorage.getItem('completed_python_exercises') || '[]');
 
-    // 1. CHỐT CHẶN PASTE & COPY TOÀN DIỆN
+    // 1. CHỐT CHẶN PASTE & COPY TOÀN CỤC
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('copy', (e) => e.preventDefault());
 
@@ -366,14 +366,13 @@
     }
     initPyodide();
 
-    // 4. NẠP DỮ LIỆU CÓ CƠ CHẾ DỰ PHÒNG (Fallback)
+    // 4. NẠP DỮ LIỆU BÀI HỌC
     async function loadCurriculum() {
       try {
         const res = await fetch('curriculum.json');
-        if (!res.ok) throw new Error('Fetch failed');
+        if (!res.ok) throw new Error('Không thể fetch curriculum.json');
         curriculum = await res.json();
       } catch (err) {
-        console.warn("Không thể fetch curriculum.json. Sử dụng bộ dữ liệu dự phòng cục bộ.", err);
         curriculum = defaultCurriculum;
       }
 
